@@ -5,6 +5,6 @@ module ActsAsReactable
     belongs_to :reactable, polymorphic: true
     belongs_to :reactor, polymorphic: true
 
-    validates_format_of :emoji, with: Unicode::Emoji::REGEX
+    validates_format_of :emoji, with: /\A#{Unicode::Emoji::REGEX.source}\z/
   end
 end

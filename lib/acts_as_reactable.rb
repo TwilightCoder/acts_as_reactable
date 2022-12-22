@@ -3,6 +3,7 @@
 require "active_record"
 
 require_relative "acts_as_reactable/version"
+require_relative "acts_as_reactable/emoji_mart_allowed_ids"
 require_relative "acts_as_reactable/reaction"
 require_relative "acts_as_reactable/reactable"
 require_relative "acts_as_reactable/reactor"

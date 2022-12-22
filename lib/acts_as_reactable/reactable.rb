@@ -11,9 +11,9 @@ module ActsAsReactable
         has_many :reactions, class_name: "ActsAsReactable::Reaction", as: :reactable, dependent: :delete_all
 
         define_method :update_reaction_from do |reactor, emoji_attrs = {}|
-          raise "InvalidReactor" if !reactor
+          raise "InvalidReactor" unless reactor
 
-          if !emoji_attrs.present?
+          unless emoji_attrs.present?
             return reactions.where(reactor: reactor).destroy_all
           end
 
@@ -44,7 +44,7 @@ module ActsAsReactable
         define_method :remove_reactions do |reactor, emoji_attrs_or_list = nil|
           return unless emoji_attrs_or_list
 
-          if !emoji_attrs_or_list.present?
+          unless emoji_attrs_or_list.present?
             return reactions.where(reactor: reactor).destroy_all
           end
 

@@ -18,52 +18,54 @@ module ActsAsReactable
           reaction.destroy
         end
 
-        define_method :update_reaction_from do |reactor, emoji = nil|
+        define_method :update_reaction_from do |reactor, emoji_attrs = {}|
           raise "InvalidReactor" if !reactor
 
-          if !emoji
+          if !emoji_attrs.present?
             return destroy_reaction_from(reactor)
           end
 
-          reaction = reactions.where({reactor: reactor, emoji: emoji}).first_or_create
+          reaction = reactions.where({reactor: reactor, **emoji_attrs}).first_or_create
           reaction
         end
 
-        define_method :add_reactions do |reactor, emoji_or_list = nil|
-          return unless emoji_or_list
+        define_method :add_reactions do |reactor, emoji_attrs_or_list = nil|
+          return unless emoji_attrs_or_list
 
-          emojis = if emoji_or_list.is_a?(Array)
-            emoji_or_list
+          emoji_attrs_arr = if emoji_attrs_or_list.is_a?(Array)
+            emoji_attrs_or_list
           else
-            [emoji_or_list]
+            [emoji_attrs_or_list]
           end
 
           # TODO performance
           # optimize by using a single query
-          emojis
-            .compact
-            .uniq
-            .each do |emoji|
-              reaction = reactions.find_or_create_by(reactor: reactor, emoji: emoji)
+          emoji_attrs_arr
+            .each do |emoji_attrs|
+              reaction = reactions.find_or_create_by(reactor: reactor, **emoji_attrs)
               reaction.save unless reaction.persisted?
             end
 
           self
         end
 
-        define_method :remove_reactions do |reactor, emoji_or_list = nil|
-          return unless emoji_or_list
+        define_method :remove_reactions do |reactor, emoji_attrs_or_list = nil|
+          return unless emoji_attrs_or_list
 
-          emojis = if emoji_or_list.is_a?(Array)
-            emoji_or_list
-          else
-            [emoji_or_list]
+          if !emoji_attrs_or_list.present?
+            return reactions.where(reactor: reactor).destroy_all
           end
 
-          reactions
-            .where(reactor: reactor, emoji: emojis.compact.uniq)
-            .destroy_all
+          emoji_attr_arr = if emoji_attrs_or_list.is_a?(Array)
+            emoji_attrs_or_list
+          else
+            [emoji_attrs_or_list]
+          end
 
+          emoji_attrs_arr
+            .each do |emoji_attrs|
+              reactions.where(reactor: reactor, **emoji_attrs).destroy_all
+            end
           self
         end
       end

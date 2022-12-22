@@ -10,19 +10,11 @@ module ActsAsReactable
       def acts_as_reactable
         has_many :reactions, class_name: "ActsAsReactable::Reaction", as: :reactable, dependent: :delete_all
 
-        define_method :destroy_reaction_from do |reactor|
-          raise "InvalidReactor" if !reactor
-
-          puts reaction = reactions.find_by(reactor: reactor)
-          return unless (reaction = reactions.find_by(reactor: reactor))
-          reaction.destroy
-        end
-
         define_method :update_reaction_from do |reactor, emoji_attrs = {}|
           raise "InvalidReactor" if !reactor
 
           if !emoji_attrs.present?
-            return destroy_reaction_from(reactor)
+            return reactions.where(reactor: reactor).destroy_all
           end
 
           reaction = reactions.where({reactor: reactor, **emoji_attrs}).first_or_create
